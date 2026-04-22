@@ -1,0 +1,483 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserStatus {
+  ACTIVE
+  INVITED
+  SUSPENDED
+}
+
+enum LeadStatus {
+  NEW
+  QUALIFYING
+  NURTURING
+  CONVERTED
+  LOST
+}
+
+enum DealStatus {
+  OPEN
+  WON
+  LOST
+}
+
+enum ActivityType {
+  NOTE
+  CALL
+  EMAIL
+  WHATSAPP
+  MEETING
+  TASK
+  STATUS_CHANGE
+}
+
+enum TaskStatus {
+  PENDING
+  IN_PROGRESS
+  DONE
+  CANCELED
+}
+
+enum ChannelType {
+  WHATSAPP
+  EMAIL
+}
+
+enum MessageStatus {
+  QUEUED
+  SENT
+  DELIVERED
+  OPENED
+  CLICKED
+  REPLIED
+  FAILED
+}
+
+enum IntegrationProvider {
+  GOOGLE_CALENDAR
+  META_ADS
+  GOOGLE_ADS
+  ERP
+  WEBHOOK
+}
+
+model Tenant {
+  id                String              @id @default(cuid())
+  name              String
+  slug              String              @unique
+  legalName         String?
+  taxId             String?
+  timezone          String              @default("America/Sao_Paulo")
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  users             User[]
+  teams             Team[]
+  leads             Lead[]
+  contacts          Contact[]
+  companies         Company[]
+  deals             Deal[]
+  pipelines         Pipeline[]
+  tasks             Task[]
+  templates         MessageTemplate[]
+  automationFlows   AutomationFlow[]
+  calendarEvents    CalendarEvent[]
+  integrations      IntegrationConnection[]
+  auditLogs         AuditLog[]
+  goals             Goal[]
+}
+
+model User {
+  id                String              @id @default(cuid())
+  tenantId          String
+  teamId            String?
+  name              String
+  email             String
+  phone             String?
+  avatarUrl         String?
+  status            UserStatus          @default(ACTIVE)
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  tenant            Tenant              @relation(fields: [tenantId], references: [id])
+  team              Team?               @relation(fields: [teamId], references: [id])
+  roles             UserRole[]
+  ownedLeads        Lead[]              @relation("LeadOwner")
+  ownedDeals        Deal[]              @relation("DealOwner")
+  tasks             Task[]              @relation("TaskAssignee")
+  interactions      Interaction[]       @relation("InteractionAuthor")
+  auditLogs         AuditLog[]
+
+  @@unique([tenantId, email])
+  @@index([tenantId, teamId])
+}
+
+model Team {
+  id                String              @id @default(cuid())
+  tenantId          String
+  name              String
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  tenant            Tenant              @relation(fields: [tenantId], references: [id])
+  users             User[]
+  goals             Goal[]
+
+  @@index([tenantId])
+}
+
+model Role {
+  id                String              @id @default(cuid())
+  code              String              @unique
+  name              String
+  description       String?
+  permissions       RolePermission[]
+  users             UserRole[]
+}
+
+model Permission {
+  id                String              @id @default(cuid())
+  code              String              @unique
+  module            String
+  action            String
+  description       String?
+  roles             RolePermission[]
+}
+
+model UserRole {
+  id                String              @id @default(cuid())
+  userId            String
+  roleId            String
+  user              User                @relation(fields: [userId], references: [id])
+  role              Role                @relation(fields: [roleId], references: [id])
+
+  @@unique([userId, roleId])
+}
+
+model RolePermission {
+  id                String              @id @default(cuid())
+  roleId            String
+  permissionId      String
+  role              Role                @relation(fields: [roleId], references: [id])
+  permission        Permission          @relation(fields: [permissionId], references: [id])
+
+  @@unique([roleId, permissionId])
+}
+
+model Company {
+  id                String              @id @default(cuid())
+  tenantId          String
+  name              String
+  website           String?
+  industry          String?
+  size              String?
+  city              String?
+  state             String?
+  country           String?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  tenant            Tenant              @relation(fields: [tenantId], references: [id])
+  contacts          Contact[]
+  leads             Lead[]
+  deals             Deal[]
+
+  @@index([tenantId, name])
+}
+
+model Contact {
+  id                String              @id @default(cuid())
+  tenantId          String
+  companyId         String?
+  name              String
+  email             String?
+  phone             String?
+  position          String?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  tenant            Tenant              @relation(fields: [tenantId], references: [id])
+  company           Company?            @relation(fields: [companyId], references: [id])
+  leads             Lead[]
+  deals             Deal[]
+
+  @@index([tenantId, companyId])
+}
+
+model Lead {
+  id                String              @id @default(cuid())
+  tenantId          String
+  ownerId           String?
+  companyId         String?
+  contactId         String?
+  pipelineId        String?
+  stageId           String?
+  name              String
+  email             String?
+  phone             String?
+  source            String
+  status            LeadStatus          @default(NEW)
+  score             Int                 @default(0)
+  temperature       String?
+  lastContactAt     DateTime?
+  nextFollowUpAt    DateTime?
+  convertedAt       DateTime?
+  lostReason        String?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  tenant            Tenant              @relation(fields: [tenantId], references: [id])
+  owner             User?               @relation("LeadOwner", fields: [ownerId], references: [id])
+  company           Company?            @relation(fields: [companyId], references: [id])
+  contact           Contact?            @relation(fields: [contactId], references: [id])
+  pipeline          Pipeline?           @relation(fields: [pipelineId], references: [id])
+  stage             PipelineStage?      @relation(fields: [stageId], references: [id])
+  tags              LeadTag[]
+  interactions      Interaction[]
+  tasks             Task[]
+
+  @@index([tenantId, ownerId, status])
+  @@index([tenantId, pipelineId, stageId])
+}
+
+model Tag {
+  id                String              @id @default(cuid())
+  tenantId          String
+  name              String
+  color             String?
+  leads             LeadTag[]
+  tenant            Tenant              @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, name])
+}
+
+model LeadTag {
+  leadId            String
+  tagId             String
+  lead              Lead                @relation(fields: [leadId], references: [id])
+  tag               Tag                 @relation(fields: [tagId], references: [id])
+
+  @@id([leadId, tagId])
+}
+
+model Pipeline {
+  id                String              @id @default(cuid())
+  tenantId          String
+  name              String
+  isDefault         Boolean             @default(false)
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  tenant            Tenant              @relation(fields: [tenantId], references: [id])
+  stages            PipelineStage[]
+  leads             Lead[]
+  deals             Deal[]
+
+  @@index([tenantId])
+}
+
+model PipelineStage {
+  id                String              @id @default(cuid())
+  pipelineId        String
+  name              String
+  position          Int
+  probability       Int                 @default(0)
+  slaHours          Int?
+  pipeline          Pipeline            @relation(fields: [pipelineId], references: [id])
+  leads             Lead[]
+  deals             Deal[]
+
+  @@unique([pipelineId, position])
+}
+
+model Deal {
+  id                String              @id @default(cuid())
+  tenantId          String
+  ownerId           String?
+  companyId         String?
+  contactId         String?
+  pipelineId        String
+  stageId           String
+  title             String
+  value             Decimal             @db.Decimal(14, 2)
+  currency          String              @default("BRL")
+  status            DealStatus          @default(OPEN)
+  expectedCloseAt   DateTime?
+  wonAt             DateTime?
+  lostAt            DateTime?
+  lostReason        String?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  tenant            Tenant              @relation(fields: [tenantId], references: [id])
+  owner             User?               @relation("DealOwner", fields: [ownerId], references: [id])
+  company           Company?            @relation(fields: [companyId], references: [id])
+  contact           Contact?            @relation(fields: [contactId], references: [id])
+  pipeline          Pipeline            @relation(fields: [pipelineId], references: [id])
+  stage             PipelineStage       @relation(fields: [stageId], references: [id])
+  tasks             Task[]
+  interactions      Interaction[]
+
+  @@index([tenantId, ownerId, status])
+  @@index([tenantId, pipelineId, stageId])
+}
+
+model Interaction {
+  id                String              @id @default(cuid())
+  tenantId          String
+  leadId            String?
+  dealId            String?
+  authorId          String?
+  type              ActivityType
+  subject           String?
+  body              String?
+  occurredAt        DateTime            @default(now())
+  createdAt         DateTime            @default(now())
+  tenant            Tenant              @relation(fields: [tenantId], references: [id])
+  lead              Lead?               @relation(fields: [leadId], references: [id])
+  deal              Deal?               @relation(fields: [dealId], references: [id])
+  author            User?               @relation("InteractionAuthor", fields: [authorId], references: [id])
+
+  @@index([tenantId, leadId, occurredAt])
+  @@index([tenantId, dealId, occurredAt])
+}
+
+model Task {
+  id                String              @id @default(cuid())
+  tenantId          String
+  leadId            String?
+  dealId            String?
+  assigneeId        String?
+  title             String
+  description       String?
+  dueAt             DateTime?
+  priority          String?
+  status            TaskStatus          @default(PENDING)
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  tenant            Tenant              @relation(fields: [tenantId], references: [id])
+  lead              Lead?               @relation(fields: [leadId], references: [id])
+  deal              Deal?               @relation(fields: [dealId], references: [id])
+  assignee          User?               @relation("TaskAssignee", fields: [assigneeId], references: [id])
+
+  @@index([tenantId, assigneeId, status])
+  @@index([tenantId, dueAt])
+}
+
+model MessageTemplate {
+  id                String              @id @default(cuid())
+  tenantId          String
+  channel           ChannelType
+  name              String
+  subject           String?
+  body              String
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  tenant            Tenant              @relation(fields: [tenantId], references: [id])
+  deliveries        MessageDelivery[]
+
+  @@index([tenantId, channel])
+}
+
+model MessageDelivery {
+  id                String              @id @default(cuid())
+  tenantId          String
+  templateId        String?
+  leadId            String?
+  dealId            String?
+  channel           ChannelType
+  providerMessageId String?
+  status            MessageStatus       @default(QUEUED)
+  recipient         String
+  sentAt            DateTime?
+  deliveredAt       DateTime?
+  openedAt          DateTime?
+  clickedAt         DateTime?
+  repliedAt         DateTime?
+  errorMessage      String?
+  createdAt         DateTime            @default(now())
+  tenant            Tenant              @relation(fields: [tenantId], references: [id])
+  template          MessageTemplate?    @relation(fields: [templateId], references: [id])
+
+  @@index([tenantId, channel, status])
+}
+
+model AutomationFlow {
+  id                String              @id @default(cuid())
+  tenantId          String
+  name              String
+  triggerType       String
+  entryModule       String
+  status            String              @default("ACTIVE")
+  definition        Json
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  tenant            Tenant              @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, status])
+}
+
+model CalendarEvent {
+  id                String              @id @default(cuid())
+  tenantId          String
+  ownerId           String?
+  leadId            String?
+  dealId            String?
+  externalEventId   String?
+  title             String
+  description       String?
+  startsAt          DateTime
+  endsAt            DateTime
+  provider          String?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  tenant            Tenant              @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, startsAt])
+}
+
+model Goal {
+  id                String              @id @default(cuid())
+  tenantId          String
+  teamId            String?
+  ownerId           String?
+  title             String
+  metric            String
+  targetValue       Decimal             @db.Decimal(14, 2)
+  currentValue      Decimal             @default(0) @db.Decimal(14, 2)
+  startsAt          DateTime
+  endsAt            DateTime
+  tenant            Tenant              @relation(fields: [tenantId], references: [id])
+  team              Team?               @relation(fields: [teamId], references: [id])
+
+  @@index([tenantId, startsAt, endsAt])
+}
+
+model IntegrationConnection {
+  id                String              @id @default(cuid())
+  tenantId          String
+  provider          IntegrationProvider
+  name              String
+  status            String              @default("CONNECTED")
+  config            Json
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  tenant            Tenant              @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, provider])
+}
+
+model AuditLog {
+  id                String              @id @default(cuid())
+  tenantId          String
+  userId            String?
+  module            String
+  action            String
+  entityType        String
+  entityId          String
+  metadata          Json?
+  createdAt         DateTime            @default(now())
+  tenant            Tenant              @relation(fields: [tenantId], references: [id])
+  user              User?               @relation(fields: [userId], references: [id])
+
+  @@index([tenantId, module, createdAt])
+  @@index([tenantId, userId, createdAt])
+}

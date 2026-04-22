@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PulseCRM | CRM Profissional</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="bg-orb orb-a"></div>
+    <div class="bg-orb orb-b"></div>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand-mark">P</div>
+          <div>
+            <strong>PulseCRM</strong>
+            <span>Revenue OS</span>
+          </div>
+        </div>
+        <nav class="nav-list" id="nav-list"></nav>
+        <div class="sidebar-card">
+          <p>Pipeline health</p>
+          <strong>84%</strong>
+          <span>15 deals precisam de acao hoje.</span>
+        </div>
+      </aside>
+
+      <main class="main-content">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">CRM SaaS multicanal</p>
+            <h1 id="page-title">Dashboard Executivo</h1>
+          </div>
+          <div class="topbar-actions">
+            <button class="ghost-btn">Exportar</button>
+            <button class="primary-btn">Novo lead</button>
+          </div>
+        </header>
+
+        <section class="hero-panel">
+          <div>
+            <p class="eyebrow">Visao consolidada de vendas e atendimento</p>
+            <h2>Um CRM pronto para escalar operacao comercial, automacao e integracoes.</h2>
+            <p class="hero-copy">
+              Gestao de leads, pipeline, agenda, automacoes e mensagens em uma experiencia unica, responsiva e orientada a performance.
+            </p>
+          </div>
+          <div class="hero-metrics">
+            <div>
+              <span>Receita prevista</span>
+              <strong>R$ 2,4 mi</strong>
+            </div>
+            <div>
+              <span>Conversao MQL para SQL</span>
+              <strong>31,8%</strong>
+            </div>
+          </div>
+        </section>
+
+        <section class="kpi-grid" id="kpi-grid"></section>
+
+        <section class="content-grid">
+          <article class="panel panel-wide">
+            <div class="panel-header">
+              <div>
+                <p class="eyebrow">Pipeline e forecast</p>
+                <h3>Negociacoes por etapa</h3>
+              </div>
+              <button class="ghost-btn">Ver pipeline</button>
+            </div>
+            <div class="pipeline-board" id="pipeline-board"></div>
+          </article>
+
+          <article class="panel">
+            <div class="panel-header">
+              <div>
+                <p class="eyebrow">Automacao omnichannel</p>
+                <h3>Fluxos ativos</h3>
+              </div>
+            </div>
+            <div class="stack-list" id="automation-list"></div>
+          </article>
+
+          <article class="panel">
+            <div class="panel-header">
+              <div>
+                <p class="eyebrow">Agenda integrada</p>
+                <h3>Agenda do time</h3>
+              </div>
+            </div>
+            <div class="stack-list" id="schedule-list"></div>
+          </article>
+
+          <article class="panel panel-wide">
+            <div class="panel-header">
+              <div>
+                <p class="eyebrow">Insights comerciais</p>
+                <h3>Performance por canal</h3>
+              </div>
+            </div>
+            <div class="chart-wrap" id="channel-chart"></div>
+          </article>
+        </section>
+
+        <section class="experience-grid">
+          <article class="panel">
+            <div class="panel-header">
+              <div>
+                <p class="eyebrow">Tela web</p>
+                <h3>Workspace operacional</h3>
+              </div>
+            </div>
+            <div class="feature-list" id="web-features"></div>
+          </article>
+
+          <article class="mobile-frame">
+            <div class="mobile-notch"></div>
+            <div class="mobile-screen">
+              <div class="mobile-header">
+                <div>
+                  <span>Hoje</span>
+                  <strong>Operacao mobile</strong>
+                </div>
+                <div class="pill">7 alertas</div>
+              </div>
+              <div class="mobile-cards" id="mobile-cards"></div>
+              <nav class="mobile-nav">
+                <button class="is-active">Inicio</button>
+                <button>Pipeline</button>
+                <button>Agenda</button>
+                <button>Inbox</button>
+                <button>Mais</button>
+              </nav>
+            </div>
+          </article>
+        </section>
+      </main>
+    </div>
+
+    <script src="./app.js"></script>
+  </body>
+</html>

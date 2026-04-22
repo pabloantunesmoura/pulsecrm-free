@@ -1,0 +1,12 @@
+{
+  "name": "pulsecrm-workspace",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "python ./apps/api/server.py",
+    "start": "python ./apps/api/server.py",
+    "check:api": "python -m py_compile ./apps/api/server.py",
+    "check:web": "node --check ./apps/web/app.js"
+  }
+}

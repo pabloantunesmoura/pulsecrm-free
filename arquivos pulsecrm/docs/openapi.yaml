@@ -1,0 +1,274 @@
+openapi: 3.1.0
+info:
+  title: PulseCRM API
+  version: 1.0.0
+  description: API RESTful base para CRM multiempresa com vendas, atendimento, agenda, automacao e relatorios.
+servers:
+  - url: https://api.pulsecrm.com/v1
+security:
+  - bearerAuth: []
+tags:
+  - name: Auth
+  - name: Leads
+  - name: Contacts
+  - name: Companies
+  - name: Deals
+  - name: Tasks
+  - name: Messages
+  - name: Automations
+  - name: Calendar
+  - name: Reports
+  - name: Users
+  - name: Integrations
+paths:
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Autentica um usuario
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Sessao autenticada
+  /leads:
+    get:
+      tags: [Leads]
+      summary: Lista leads com filtros
+      parameters:
+        - in: query
+          name: search
+          schema:
+            type: string
+        - in: query
+          name: stageId
+          schema:
+            type: string
+        - in: query
+          name: ownerId
+          schema:
+            type: string
+        - in: query
+          name: source
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lista de leads
+    post:
+      tags: [Leads]
+      summary: Cria um lead
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateLeadInput'
+      responses:
+        '201':
+          description: Lead criado
+  /leads/{leadId}:
+    get:
+      tags: [Leads]
+      summary: Busca detalhe de um lead
+      parameters:
+        - $ref: '#/components/parameters/LeadId'
+      responses:
+        '200':
+          description: Lead detalhado
+    patch:
+      tags: [Leads]
+      summary: Atualiza um lead
+      parameters:
+        - $ref: '#/components/parameters/LeadId'
+      responses:
+        '200':
+          description: Lead atualizado
+  /contacts:
+    get:
+      tags: [Contacts]
+      summary: Lista contatos
+      responses:
+        '200':
+          description: Lista de contatos
+  /companies:
+    get:
+      tags: [Companies]
+      summary: Lista empresas
+      responses:
+        '200':
+          description: Lista de empresas
+  /deals:
+    get:
+      tags: [Deals]
+      summary: Lista negocios
+      responses:
+        '200':
+          description: Lista de negocios
+    post:
+      tags: [Deals]
+      summary: Cria negocio
+      responses:
+        '201':
+          description: Negocio criado
+  /deals/{dealId}/stage:
+    patch:
+      tags: [Deals]
+      summary: Move negocio de etapa
+      parameters:
+        - $ref: '#/components/parameters/DealId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [stageId]
+              properties:
+                stageId:
+                  type: string
+      responses:
+        '200':
+          description: Etapa atualizada
+  /tasks:
+    get:
+      tags: [Tasks]
+      summary: Lista tarefas
+      responses:
+        '200':
+          description: Lista de tarefas
+    post:
+      tags: [Tasks]
+      summary: Cria tarefa
+      responses:
+        '201':
+          description: Tarefa criada
+  /messages/send:
+    post:
+      tags: [Messages]
+      summary: Dispara mensagem manual
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [channel, recipientId, templateId]
+              properties:
+                channel:
+                  type: string
+                  enum: [whatsapp, email]
+                recipientId:
+                  type: string
+                templateId:
+                  type: string
+      responses:
+        '202':
+          description: Envio enfileirado
+  /automations/flows:
+    get:
+      tags: [Automations]
+      summary: Lista fluxos de automacao
+      responses:
+        '200':
+          description: Lista de fluxos
+    post:
+      tags: [Automations]
+      summary: Cria fluxo de automacao
+      responses:
+        '201':
+          description: Fluxo criado
+  /calendar/events:
+    get:
+      tags: [Calendar]
+      summary: Lista eventos sincronizados
+      responses:
+        '200':
+          description: Lista de eventos
+    post:
+      tags: [Calendar]
+      summary: Cria evento e sincroniza
+      responses:
+        '201':
+          description: Evento criado
+  /reports/dashboard:
+    get:
+      tags: [Reports]
+      summary: Retorna KPIs do dashboard
+      responses:
+        '200':
+          description: Dashboard carregado
+  /reports/sales:
+    get:
+      tags: [Reports]
+      summary: Retorna relatorio de vendas
+      responses:
+        '200':
+          description: Relatorio gerado
+  /users:
+    get:
+      tags: [Users]
+      summary: Lista usuarios do tenant
+      responses:
+        '200':
+          description: Lista de usuarios
+  /integrations/webhooks:
+    post:
+      tags: [Integrations]
+      summary: Registra webhook
+      responses:
+        '201':
+          description: Webhook criado
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    LeadId:
+      in: path
+      name: leadId
+      required: true
+      schema:
+        type: string
+    DealId:
+      in: path
+      name: dealId
+      required: true
+      schema:
+        type: string
+  schemas:
+    CreateLeadInput:
+      type: object
+      required: [name, source]
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        source:
+          type: string
+        score:
+          type: integer
+        ownerId:
+          type: string
+        companyId:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string

@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PulseCRM Workspace</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="ambient ambient-a"></div>
+    <div class="ambient ambient-b"></div>
+
+    <div class="layout">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand-icon">P</div>
+          <div>
+            <strong>PulseCRM</strong>
+            <span>Sales, Service and Automation</span>
+          </div>
+        </div>
+
+        <section class="login-card">
+          <p class="eyebrow">Acesso demo</p>
+          <label>
+            <span>E-mail</span>
+            <select id="login-email"></select>
+          </label>
+          <label>
+            <span>Senha</span>
+            <input id="login-password" type="password" value="demo123" />
+          </label>
+          <button id="login-button" class="primary-btn">Entrar no workspace</button>
+          <small>Usuarios de demonstração com autenticação local.</small>
+        </section>
+
+        <section class="login-card invite-accept-card" id="invite-accept-card" hidden>
+          <p class="eyebrow">Aceitar convite</p>
+          <strong id="invite-tenant">Workspace compartilhado</strong>
+          <span id="invite-summary">Convite aguardando validação.</span>
+          <form id="accept-invite-form" class="invite-accept-form">
+            <label>
+              <span>E-mail convidado</span>
+              <input id="accept-email" name="email" disabled />
+            </label>
+            <label>
+              <span>Seu nome</span>
+              <input name="name" required />
+            </label>
+            <label>
+              <span>Telefone</span>
+              <input name="phone" />
+            </label>
+            <label>
+              <span>Crie uma senha</span>
+              <input name="password" type="password" required minlength="6" />
+            </label>
+            <button class="primary-btn" type="submit">Entrar com meu convite</button>
+          </form>
+          <small id="invite-feedback">Compartilhe o link do convite com a pessoa certa.</small>
+        </section>
+
+        <nav class="nav-list" id="nav-list"></nav>
+
+        <section class="sidebar-foot">
+          <p class="eyebrow">Arquitetura</p>
+          <strong>Multi-tenant</strong>
+          <span>Base preparada para migrar para Next.js, NestJS e Prisma.</span>
+        </section>
+      </aside>
+
+      <main class="content">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Workspace operacional</p>
+            <h1 id="page-title">Dashboard executivo</h1>
+            <p class="subtitle" id="tenant-name">Carregando ambiente...</p>
+          </div>
+          <div class="top-actions">
+            <button class="ghost-btn" id="seed-button">Recarregar dados</button>
+            <button class="primary-btn" id="new-lead-button">Novo lead</button>
+          </div>
+        </header>
+
+        <section class="hero">
+          <div>
+            <p class="eyebrow">CRM avançado para vendas e atendimento</p>
+            <h2>Operacao comercial, automacao e agenda trabalhando em um unico pulso.</h2>
+            <p class="subtitle">
+              Dashboard, leads, pipeline, agenda, automacoes e controles de equipe conectados a uma API local pronta para evolucao.
+            </p>
+          </div>
+          <div class="hero-stack">
+            <div>
+              <span>Canal lider</span>
+              <strong>WhatsApp</strong>
+            </div>
+            <div>
+              <span>SLA medio</span>
+              <strong>6 min</strong>
+            </div>
+          </div>
+        </section>
+
+        <section class="metrics" id="metrics"></section>
+
+        <section class="workspace-grid">
+          <article class="panel panel-wide">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">Leads e clientes</p>
+                <h3>Base comercial</h3>
+              </div>
+              <button class="ghost-btn">Filtros salvos</button>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Lead</th>
+                    <th>Empresa</th>
+                    <th>Origem</th>
+                    <th>Score</th>
+                    <th>Etapa</th>
+                    <th>Proxima acao</th>
+                  </tr>
+                </thead>
+                <tbody id="lead-rows"></tbody>
+              </table>
+            </div>
+          </article>
+
+          <article class="panel">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">Agenda</p>
+                <h3>Compromissos</h3>
+              </div>
+            </div>
+            <div class="stack-list" id="agenda-list"></div>
+          </article>
+
+          <article class="panel panel-wide">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">Pipeline</p>
+                <h3>Kanban de negociacoes</h3>
+              </div>
+            </div>
+            <div class="pipeline-board" id="pipeline-board"></div>
+          </article>
+
+          <article class="panel">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">Automacoes</p>
+                <h3>Fluxos ativos</h3>
+              </div>
+            </div>
+            <div class="stack-list" id="automation-list"></div>
+          </article>
+
+          <article class="panel">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">Atividades</p>
+                <h3>Timeline</h3>
+              </div>
+            </div>
+            <div class="timeline-list" id="activity-list"></div>
+          </article>
+
+          <article class="panel">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">Equipe</p>
+                <h3>Usuarios e perfis</h3>
+              </div>
+            </div>
+            <div class="stack-list" id="team-list"></div>
+          </article>
+
+          <article class="panel">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">Compartilhamento gratuito</p>
+                <h3>Convide amigos e equipe</h3>
+              </div>
+            </div>
+            <form class="invite-form" id="invite-form">
+              <label>
+                <span>E-mail do convidado</span>
+                <input name="email" type="email" placeholder="amigo@empresa.com" required />
+              </label>
+              <label>
+                <span>Perfil</span>
+                <select name="roleId" id="invite-role"></select>
+              </label>
+              <button class="primary-btn" type="submit">Gerar convite</button>
+            </form>
+            <div class="stack-list" id="invite-list"></div>
+          </article>
+
+          <article class="panel">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">App mobile</p>
+                <h3>Operacao em campo</h3>
+              </div>
+            </div>
+            <div class="mobile-preview">
+              <div class="phone">
+                <div class="phone-notch"></div>
+                <div class="phone-screen" id="mobile-preview"></div>
+              </div>
+            </div>
+          </article>
+        </section>
+      </main>
+    </div>
+
+    <dialog id="lead-dialog">
+      <form class="dialog-card" method="dialog" id="lead-form">
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow">Novo lead</p>
+            <h3>Cadastrar oportunidade</h3>
+          </div>
+        </div>
+        <div class="form-grid">
+          <label>
+            <span>Nome</span>
+            <input name="name" required />
+          </label>
+          <label>
+            <span>Empresa</span>
+            <input name="company" required />
+          </label>
+          <label>
+            <span>E-mail</span>
+            <input name="email" type="email" />
+          </label>
+          <label>
+            <span>Telefone</span>
+            <input name="phone" />
+          </label>
+          <label>
+            <span>Origem</span>
+            <input name="source" value="Manual" />
+          </label>
+          <label>
+            <span>Proxima acao</span>
+            <input name="nextAction" value="Realizar primeiro contato" />
+          </label>
+        </div>
+        <label>
+          <span>Observacoes</span>
+          <textarea name="notes" rows="4"></textarea>
+        </label>
+        <div class="dialog-actions">
+          <button value="cancel" class="ghost-btn">Cancelar</button>
+          <button class="primary-btn" type="submit">Salvar lead</button>
+        </div>
+      </form>
+    </dialog>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
